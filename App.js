@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import styled from "styled-components/native";
+import Todos from "./Todos";
 
 const Container = styled.View`
   flex: 1;
@@ -32,7 +33,7 @@ const TodoContainer = styled.View`
 `;
 
 const Input = styled.TextInput`
-  margin: 5px 20px;
+  margin: 5px 20px 10px;
   height: 45px;
   border-radius: 7px;
   padding: 5px;
@@ -47,6 +48,7 @@ export default function App() {
       </Header>
       <TodoContainer>
         <Input placeholder="write todo" />
+        <Todos />
       </TodoContainer>
     </Container>
   );
