@@ -1,7 +1,9 @@
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { Component } from "react";
+import { AsyncStorage } from "react-native";
 import styled from "styled-components/native";
 import Todos from "./Todos";
+import { AppLoading } from "expo";
+import { generateId } from "./utils";
 
 const Container = styled.View`
   flex: 1;
@@ -36,20 +38,178 @@ const Input = styled.TextInput`
   margin: 5px 20px 10px;
   height: 45px;
   border-radius: 7px;
-  padding: 5px;
-  border: 1px solid #c2c2c2;
+  padding: 10px;
+  border: 1px solid #d5d5d5;
 `;
 
-export default function App() {
-  return (
-    <Container>
-      <Header>
-        <Title>Awesome todo</Title>
-      </Header>
-      <TodoContainer>
-        <Input placeholder="write todo" />
-        <Todos />
-      </TodoContainer>
-    </Container>
-  );
+const TodoItemContainer = styled.View`
+  width: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+`;
+
+export default class App extends Component {
+  state = {
+    newTodo: "",
+    loadTodo: false,
+    todos: {},
+  };
+
+  componentDidMount = () => {
+    this._loadTodos();
+  };
+
+  _loadTodos = async () => {
+    try {
+      const todos = await AsyncStorage.getItem("todos");
+      const parsedTodos = JSON.parse(todos);
+      console.log(parsedTodos);
+      this.setState({
+        loadTodo: true,
+        todos: parsedTodos,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  _changeTodo = (text) => {
+    this.setState({
+      newTodo: text,
+    });
+  };
+
+  _submitTodo = () => {
+    const { newTodo } = this.state;
+
+    if (newTodo !== "") {
+      this.setState((prevState) => {
+        const ID = generateId();
+        const newTodoObj = {
+          [ID]: {
+            id: ID,
+            todo: newTodo,
+            isCompleted: false,
+            createAt: Date.now(),
+          },
+        };
+
+        const newState = {
+          ...prevState,
+          newTodo: "",
+          todos: {
+            ...prevState.todos,
+            ...newTodoObj,
+          },
+        };
+
+        this._saveTodos(newState.todos);
+        return { ...newState };
+      });
+    }
+  };
+
+  _deleteTodo = (id) => {
+    this.setState((prevState) => {
+      const todos = prevState.todos;
+      delete todos[id];
+      const newState = {
+        ...prevState,
+        ...todos,
+      };
+
+      this._saveTodos(newState.todos);
+      return { ...newState };
+    });
+  };
+
+  _toggleCheck = (id) => {
+    this.setState((prevState) => {
+      const todo = prevState.todos[id];
+      const isCompleted = todo.isCompleted;
+
+      const newState = {
+        ...prevState,
+        todos: {
+          ...prevState.todos,
+          [id]: {
+            ...prevState.todos[id],
+            isCompleted: !isCompleted,
+          },
+        },
+      };
+
+      this._saveTodos(newState.todos);
+      return { ...newState };
+    });
+  };
+
+  _updateTodo = (id, text) => {
+    this.setState((prevState) => {
+      const newState = {
+        ...prevState,
+        todos: {
+          ...prevState.todos,
+          [id]: {
+            ...prevState.todos[id],
+            todo: text,
+          },
+        },
+      };
+
+      this._saveTodos(newState.todos);
+      return { ...newState };
+    });
+  };
+
+  _saveTodos = (newTodos) => {
+    console.log(JSON.stringify(newTodos));
+    const saveTodos = AsyncStorage.setItem("todos", JSON.stringify(newTodos));
+  };
+
+  render() {
+    const { newTodo, loadTodo, todos } = this.state;
+    const {
+      _changeTodo,
+      _submitTodo,
+      _deleteTodo,
+      _toggleCheck,
+      _updateTodo,
+    } = this;
+
+    console.log(todos);
+
+    if (!loadTodo) {
+      return <AppLoading />;
+    }
+    return (
+      <Container>
+        <Header>
+          <Title>So simple to do</Title>
+        </Header>
+
+        <TodoContainer>
+          <Input
+            placeholder="write todo"
+            value={newTodo}
+            onChangeText={_changeTodo}
+            returnKeyType="done"
+            autoCorrect={false}
+            onSubmitEditing={() => _submitTodo()}
+          />
+          <TodoItemContainer>
+            {Object.values(todos).map((todo) => (
+              <Todos
+                key={todo.id}
+                {...todo}
+                deleteItem={_deleteTodo}
+                checkItem={_toggleCheck}
+                updateTodo={_updateTodo}
+              />
+            ))}
+          </TodoItemContainer>
+        </TodoContainer>
+      </Container>
+    );
+  }
 }
