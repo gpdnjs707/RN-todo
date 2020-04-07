@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-
 import styled from "styled-components/native";
 import { Feather } from "@expo/vector-icons";
 
@@ -30,8 +29,8 @@ const TodoText = styled.Text`
   flex: 4.5;
   font-size: 16px;
   text-align: left;
-  color: ${props => props.color};
-  text-decoration: ${props => props.strike};
+  color: ${(props) => props.color};
+  text-decoration: ${(props) => props.strike};
 `;
 const EditingInput = styled.TextInput`
   font-size: 16px;
@@ -40,7 +39,7 @@ const EditingInput = styled.TextInput`
 export default class Todos extends Component {
   state = {
     isEditing: false,
-    todoValue: ""
+    todoValue: "",
   };
 
   //   _toggleCheck = () => {
@@ -55,13 +54,13 @@ export default class Todos extends Component {
     const { todo } = this.props;
     this.setState({
       isEditing: !isEditing,
-      todoValue: todo
+      todoValue: todo,
     });
   };
 
-  _editTodo = text => {
+  _editTodo = (text) => {
     this.setState({
-      todoValue: text
+      todoValue: text,
     });
   };
 
@@ -70,7 +69,7 @@ export default class Todos extends Component {
     const { id, updateTodo } = this.props;
     updateTodo(id, todoValue);
     this.setState({
-      isEditing: !isEditing
+      isEditing: !isEditing,
     });
   };
 
@@ -82,7 +81,7 @@ export default class Todos extends Component {
       id,
       checkItem,
       isCompleted,
-      updateTodo
+      updateTodo,
     } = this.props;
     const { _toggleCheck, _toggleEdit, _toggelSave, _editTodo } = this;
     return (
@@ -110,7 +109,12 @@ export default class Todos extends Component {
 
         <Util>
           {isEditing ? (
-            <Btn onPressOut={() => _toggelSave()}>
+            <Btn
+              onPressOut={(e) => {
+                e.stopPropagation;
+                _toggelSave();
+              }}
+            >
               <Feather
                 name="save"
                 size={22}
@@ -120,7 +124,12 @@ export default class Todos extends Component {
             </Btn>
           ) : (
             <>
-              <Btn onPressOut={() => _toggleEdit()}>
+              <Btn
+                onPressOut={(e) => {
+                  e.stopPropagation;
+                  _toggleEdit();
+                }}
+              >
                 <Feather
                   name="edit-2"
                   size={22}
@@ -128,7 +137,12 @@ export default class Todos extends Component {
                   style={{ position: "absolute", right: 0 }}
                 />
               </Btn>
-              <Btn onPressOut={() => deleteItem(id)}>
+              <Btn
+                onPressOut={(e) => {
+                  e.stopPropagation;
+                  deleteItem(id);
+                }}
+              >
                 <Feather
                   name="x"
                   size={25}

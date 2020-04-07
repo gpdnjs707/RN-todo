@@ -1,22 +1,31 @@
 {
   "expo": {
-    "name": "Awesome TODO",
+    "name": "SIMPLE TODO",
     "slug": "Awesome-todo",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#005eff"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "assets/*"
+    ],
     "ios": {
       "supportsTablet": true
-    }
+    },
+    "android": {
+      "package": "co.hyewon.simple"
+    },
+    "description": ""
   }
 }

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { AsyncStorage } from "react-native";
+import { AsyncStorage, ScrollView } from "react-native";
 import styled from "styled-components/native";
 import Todos from "./Todos";
 import { AppLoading } from "expo";
@@ -66,7 +66,7 @@ export default class App extends Component {
       console.log(parsedTodos);
       this.setState({
         loadTodo: true,
-        todos: parsedTodos,
+        todos: parsedTodos || {},
       });
     } catch (error) {
       console.log(error);
@@ -124,23 +124,32 @@ export default class App extends Component {
   };
 
   _toggleCheck = (id) => {
-    this.setState((prevState) => {
-      const todo = prevState.todos[id];
-      const isCompleted = todo.isCompleted;
+    // this.setState((prevState) => {
+    //   const todo = prevState.todos[id];
+    //   const isCompleted = todo.isCompleted;
 
-      const newState = {
-        ...prevState,
-        todos: {
-          ...prevState.todos,
-          [id]: {
-            ...prevState.todos[id],
-            isCompleted: !isCompleted,
-          },
-        },
-      };
+    //   const newState = {
+    //     ...prevState,
+    //     todos: {
+    //       ...prevState.todos,
+    //       [id]: {
+    //         ...prevState.todos[id],
+    //         isCompleted: !isCompleted,
+    //       },
+    //     },
+    //   };
 
-      this._saveTodos(newState.todos);
-      return { ...newState };
+    //   this._saveTodos(newState.todos);
+    //   return { ...newState };
+    // });
+    const { todos } = this.state;
+    const checkedItem = todos[id];
+    const newTodos = { ...todos };
+    newTodos[id] = { ...checkedItem, isCompleted: !checkedItem.isCompleted };
+
+    this._saveTodos(newTodos);
+    this.setState({
+      todos: newTodos,
     });
   };
 
@@ -177,6 +186,13 @@ export default class App extends Component {
       _updateTodo,
     } = this;
 
+    const completedItem = Object.values(todos).filter(
+      (item) => item.isCompleted === true
+    );
+    const uncompletedItem = Object.values(todos).filter(
+      (item) => item.isCompleted === false
+    );
+
     console.log(todos);
 
     if (!loadTodo) {
@@ -197,17 +213,28 @@ export default class App extends Component {
             autoCorrect={false}
             onSubmitEditing={() => _submitTodo()}
           />
-          <TodoItemContainer>
-            {Object.values(todos).map((todo) => (
-              <Todos
-                key={todo.id}
-                {...todo}
-                deleteItem={_deleteTodo}
-                checkItem={_toggleCheck}
-                updateTodo={_updateTodo}
-              />
-            ))}
-          </TodoItemContainer>
+          <ScrollView>
+            <TodoItemContainer>
+              {completedItem.map((todo) => (
+                <Todos
+                  key={todo.id}
+                  {...todo}
+                  deleteItem={_deleteTodo}
+                  checkItem={_toggleCheck}
+                  updateTodo={_updateTodo}
+                />
+              ))}
+              {uncompletedItem.map((todo) => (
+                <Todos
+                  key={todo.id}
+                  {...todo}
+                  deleteItem={_deleteTodo}
+                  checkItem={_toggleCheck}
+                  updateTodo={_updateTodo}
+                />
+              ))}
+            </TodoItemContainer>
+          </ScrollView>
         </TodoContainer>
       </Container>
     );
